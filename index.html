@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Grant Readiness Demo Sandbox</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #5b6475;
+      --line: #d7dce5;
+      --soft: #f5f7fa;
+      --panel: #ffffff;
+      --green: #0f9f6e;
+      --blue: #2563eb;
+      --amber: #c47b00;
+      --red: #d12f4b;
+      --navy: #12203a;
+      --violet: #6d4aff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #eef2f7;
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.45;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+    }
+
+    aside {
+      background: var(--navy);
+      color: #fff;
+      padding: 28px 24px;
+    }
+
+    .brand {
+      font-size: 25px;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 12px;
+    }
+
+    .version {
+      color: #b9c7df;
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+
+    .nav-section {
+      margin-top: 26px;
+    }
+
+    .nav-section h2 {
+      color: #91b4ff;
+      font-size: 12px;
+      letter-spacing: .08em;
+      margin: 0 0 10px;
+      text-transform: uppercase;
+    }
+
+    .nav-section p,
+    .nav-section li {
+      color: #d9e2f3;
+      font-size: 14px;
+      margin: 0 0 10px;
+    }
+
+    .nav-section ul {
+      padding-left: 18px;
+      margin: 0;
+    }
+
+    main {
+      padding: 32px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      font-size: 36px;
+      line-height: 1.12;
+      margin: 0 0 8px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 17px;
+      max-width: 760px;
+      margin: 0;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 6px 12px;
+      border: 1px solid #ffd08a;
+      background: #fff4df;
+      color: #855000;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(360px, 1.1fr) minmax(360px, .9fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 22px;
+    }
+
+    section h2 {
+      font-size: 22px;
+      margin: 0 0 14px;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    label {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      padding: 11px 12px;
+      min-height: 44px;
+    }
+
+    textarea {
+      min-height: 92px;
+      resize: vertical;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    button {
+      border: 0;
+      background: var(--blue);
+      color: #fff;
+      cursor: pointer;
+      font-weight: 800;
+      min-height: 44px;
+      padding: 0 16px;
+    }
+
+    button.secondary {
+      background: #e7ebf3;
+      color: var(--ink);
+    }
+
+    .score-wrap {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 22px;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .score {
+      border: 10px solid var(--green);
+      display: grid;
+      height: 150px;
+      place-items: center;
+      text-align: center;
+      width: 150px;
+    }
+
+    .score strong {
+      display: block;
+      font-size: 48px;
+      line-height: .95;
+    }
+
+    .score span {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .status h3 {
+      font-size: 24px;
+      margin: 0 0 8px;
+    }
+
+    .status p {
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .category {
+      border-top: 1px solid var(--line);
+      padding: 14px 0;
+    }
+
+    .category:last-child {
+      padding-bottom: 0;
+    }
+
+    .category-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .category h3 {
+      font-size: 17px;
+      margin: 0;
+    }
+
+    .dots {
+      display: flex;
+      gap: 5px;
+      min-width: 92px;
+      justify-content: flex-end;
+    }
+
+    .dot {
+      width: 13px;
+      height: 13px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .dot.on {
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    .category p {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0;
+    }
+
+    .output-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      margin-top: 22px;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    .narrative {
+      border-left: 5px solid var(--violet);
+      background: #f6f4ff;
+      padding: 16px;
+    }
+
+    .guardrail {
+      border-left: 5px solid var(--red);
+      background: #fff5f7;
+      margin-top: 22px;
+      padding: 16px;
+    }
+
+    .guardrail strong,
+    .narrative strong {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .locked {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .locked span {
+      background: var(--soft);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 8px 10px;
+    }
+
+    @media (max-width: 980px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      aside {
+        padding: 22px;
+      }
+
+      main {
+        padding: 22px;
+      }
+
+      .topbar,
+      .grid,
+      .output-grid,
+      .field-grid,
+      .score-wrap {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        display: grid;
+      }
+
+      .locked {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <div class="brand">Grant Readiness Demo Sandbox</div>
+      <div class="version" id="versionLine">Demo version</div>
+
+      <div class="nav-section">
+        <h2>Purpose</h2>
+        <p>Give an interested team a basic clickable version while protecting the real product logic.</p>
+      </div>
+
+      <div class="nav-section">
+        <h2>Not Included</h2>
+        <ul id="lockedList"></ul>
+      </div>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div>
+          <h1>Grant Readiness Demo Dashboard</h1>
+          <p class="subtitle">A limited, fake-data version for evaluation. It shows the user experience and business value without exposing private scoring, prompts, roadmap, or grant intelligence assets.</p>
+        </div>
+        <div class="badge">Evaluation Only</div>
+      </div>
+
+      <div class="grid">
+        <section>
+          <h2>Demo Inputs</h2>
+          <div class="field-grid">
+            <div>
+              <label for="organizationName">Organization</label>
+              <input id="organizationName">
+            </div>
+            <div>
+              <label for="fundingGoal">Funding Goal</label>
+              <input id="fundingGoal">
+            </div>
+            <div class="full">
+              <label for="grantOpportunity">Grant Opportunity</label>
+              <input id="grantOpportunity">
+            </div>
+            <div class="full">
+              <label for="programSummary">Program Summary</label>
+              <textarea id="programSummary"></textarea>
+            </div>
+            <div class="full">
+              <label for="targetPopulation">Target Population</label>
+              <input id="targetPopulation">
+            </div>
+          </div>
+          <div class="actions">
+            <button id="runDemo" type="button">Run Demo Readiness Check</button>
+            <button class="secondary" id="resetDemo" type="button">Reset Sample</button>
+          </div>
+        </section>
+
+        <section>
+          <h2>Demo Readiness Result</h2>
+          <div class="score-wrap">
+            <div class="score">
+              <div>
+                <strong id="scoreValue">3</strong>
+                <span>out of 5</span>
+              </div>
+            </div>
+            <div class="status">
+              <h3 id="scoreLabel">Promising, needs review</h3>
+              <p>This is simplified demo scoring only. It is intentionally not the production model.</p>
+            </div>
+          </div>
+          <div id="categoryList"></div>
+        </section>
+      </div>
+
+      <div class="output-grid">
+        <section>
+          <h2>Strengths</h2>
+          <ul id="strengths"></ul>
+        </section>
+        <section>
+          <h2>Gaps</h2>
+          <ul id="gaps"></ul>
+        </section>
+      </div>
+
+      <div class="output-grid">
+        <section>
+          <h2>Recommended Next Steps</h2>
+          <ul id="nextSteps"></ul>
+        </section>
+        <section>
+          <h2>Demo Narrative Output</h2>
+          <div class="narrative">
+            <strong>Sample paragraph</strong>
+            <p id="narrativeText"></p>
+          </div>
+        </section>
+      </div>
+
+      <section class="guardrail">
+        <strong>Demo-use protection language</strong>
+        <p id="ipStatement"></p>
+        <div class="locked" id="guardrails"></div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const fallbackData = {
+      demoVersion: "0.1.0",
+      demoName: "Grant Readiness Demo Sandbox",
+      updated: "2026-06-29",
+      guardrails: ["Evaluation use only", "No redistribution", "No reverse engineering", "No production submissions from demo output"],
+      lockedFeatures: ["Production scoring model", "Private AI prompts", "Grant failure database", "Full readiness intelligence framework", "Admin dashboard", "Saved records and user accounts"],
+      demoScenario: {
+        organizationName: "Riverbend Community Learning Center",
+        grantOpportunity: "Community Digital Access Mini-Grant",
+        fundingGoal: "$75,000",
+        programSummary: "Launch an after-school digital access lab with tutoring, family technology workshops, and basic career-readiness support.",
+        targetPopulation: "Middle and high school students in a low-income service area"
+      },
+      readinessCategories: [
+        { id: "fit", label: "Opportunity Fit", description: "Mission, eligible activities, and audience appear aligned.", demoScore: 4 },
+        { id: "evidence", label: "Evidence Strength", description: "Basic data exists, but outcome measures need detail.", demoScore: 3 },
+        { id: "capacity", label: "Delivery Capacity", description: "Staffing and timeline need confirmation.", demoScore: 3 },
+        { id: "compliance", label: "Compliance Readiness", description: "Attachments, approvals, and budget support need review.", demoScore: 2 }
+      ],
+      sampleOutputs: {
+        overallReadiness: 3,
+        readinessLabel: "Promising, needs review",
+        strengths: ["Mission and target population appear aligned with the opportunity.", "Program concept is understandable and fundable at a basic demo level.", "Funding request has a clear use case."],
+        gaps: ["Outcome measures need to be more specific.", "Budget support and attachment requirements need confirmation.", "Partner roles and implementation timeline need stronger detail."],
+        recommendedNextSteps: ["Confirm eligibility and deadline requirements.", "Collect baseline service-area data and expected participant counts.", "Draft a simple budget narrative and match it to program activities.", "Assign a reviewer before using any generated narrative externally."],
+        sampleNarrative: "Riverbend Community Learning Center is seeking support to expand equitable digital access for students through an after-school learning lab. The proposed program would provide supervised technology access, tutoring support, and family workshops that help participants build confidence using digital tools. Before submission, the team should confirm eligibility, strengthen outcome measures, and align the budget narrative with the proposed activities."
+      },
+      evaluationTerms: {
+        ipStatement: "All concepts, workflows, designs, prompts, documentation, and related intellectual property remain the property of the creator unless a signed agreement states otherwise."
+      }
+    };
+
+    let demoData = fallbackData;
+
+    const $ = (id) => document.getElementById(id);
+
+    function setList(id, items) {
+      $(id).innerHTML = items.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function dots(score) {
+      let html = "";
+      for (let i = 1; i <= 5; i += 1) {
+        html += `<span class="dot ${i <= score ? "on" : ""}"></span>`;
+      }
+      return html;
+    }
+
+    function fillScenario() {
+      const s = demoData.demoScenario;
+      $("organizationName").value = s.organizationName || "";
+      $("fundingGoal").value = s.fundingGoal || "";
+      $("grantOpportunity").value = s.grantOpportunity || "";
+      $("programSummary").value = s.programSummary || "";
+      $("targetPopulation").value = s.targetPopulation || "";
+    }
+
+    function render() {
+      $("versionLine").textContent = `${demoData.demoName} | v${demoData.demoVersion} | updated ${demoData.updated}`;
+      $("lockedList").innerHTML = demoData.lockedFeatures.slice(0, 6).map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+      $("guardrails").innerHTML = demoData.guardrails.map((item) => `<span>${escapeHtml(item)}</span>`).join("");
+      $("ipStatement").textContent = demoData.evaluationTerms.ipStatement;
+
+      const output = demoData.sampleOutputs;
+      $("scoreValue").textContent = output.overallReadiness;
+      $("scoreLabel").textContent = output.readinessLabel;
+      setList("strengths", output.strengths);
+      setList("gaps", output.gaps);
+      setList("nextSteps", output.recommendedNextSteps);
+      $("narrativeText").textContent = output.sampleNarrative;
+
+      $("categoryList").innerHTML = demoData.readinessCategories.map((category) => `
+        <div class="category">
+          <div class="category-head">
+            <h3>${escapeHtml(category.label)}</h3>
+            <div class="dots">${dots(category.demoScore)}</div>
+          </div>
+          <p>${escapeHtml(category.description)}</p>
+        </div>
+      `).join("");
+    }
+
+    function runDemo() {
+      const summary = $("programSummary").value.trim();
+      const hasEnoughDetail = summary.length > 120;
+      const score = hasEnoughDetail ? 3 : 2;
+      $("scoreValue").textContent = score;
+      $("scoreLabel").textContent = hasEnoughDetail ? "Promising, needs review" : "Early concept, needs detail";
+    }
+
+    async function loadData() {
+      try {
+        const response = await fetch("./grant_readiness_demo_data.json", { cache: "no-store" });
+        if (response.ok) {
+          demoData = await response.json();
+        }
+      } catch (error) {
+        demoData = fallbackData;
+      }
+      fillScenario();
+      render();
+    }
+
+    $("runDemo").addEventListener("click", runDemo);
+    $("resetDemo").addEventListener("click", () => {
+      fillScenario();
+      render();
+    });
+
+    loadData();
+  </script>
+</body>
+</html>

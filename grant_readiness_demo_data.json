@@ -1,0 +1,88 @@
+{
+  "demoVersion": "0.1.0",
+  "demoName": "Grant Readiness Demo Sandbox",
+  "updated": "2026-06-29",
+  "status": "evaluation_only",
+  "notice": "This is a limited demonstration dataset. It uses fake organizations, simplified scoring, and sample outputs. It does not include proprietary prompts, private scoring logic, grant failure data, roadmap details, customer data, or production workflow rules.",
+  "guardrails": [
+    "Evaluation use only",
+    "No redistribution",
+    "No reverse engineering",
+    "No production submissions from demo output",
+    "All concepts and future production logic remain owner intellectual property"
+  ],
+  "lockedFeatures": [
+    "Production scoring model",
+    "Private AI prompts",
+    "Grant failure database",
+    "Full readiness intelligence framework",
+    "Admin dashboard",
+    "Saved records and user accounts",
+    "Roadmap and enhancement backlog"
+  ],
+  "demoScenario": {
+    "organizationName": "Riverbend Community Learning Center",
+    "organizationType": "Nonprofit youth education provider",
+    "grantOpportunity": "Community Digital Access Mini-Grant",
+    "fundingGoal": "$75,000",
+    "programSummary": "Launch an after-school digital access lab with tutoring, family technology workshops, and basic career-readiness support.",
+    "targetPopulation": "Middle and high school students in a low-income service area",
+    "requestedUse": "Equipment, part-time instructors, curriculum materials, outreach, and evaluation support"
+  },
+  "readinessCategories": [
+    {
+      "id": "fit",
+      "label": "Opportunity Fit",
+      "description": "Checks whether the grant appears aligned with mission, eligible activities, and target population.",
+      "demoScore": 4,
+      "publicWeight": "Demo-only"
+    },
+    {
+      "id": "evidence",
+      "label": "Evidence Strength",
+      "description": "Checks whether the team has enough basic data, outcomes, and support material to make a credible case.",
+      "demoScore": 3,
+      "publicWeight": "Demo-only"
+    },
+    {
+      "id": "capacity",
+      "label": "Delivery Capacity",
+      "description": "Checks whether staffing, timeline, partners, and implementation assumptions are reasonable.",
+      "demoScore": 3,
+      "publicWeight": "Demo-only"
+    },
+    {
+      "id": "compliance",
+      "label": "Compliance Readiness",
+      "description": "Checks whether core submission items, approvals, budget support, and attachments are identified.",
+      "demoScore": 2,
+      "publicWeight": "Demo-only"
+    }
+  ],
+  "sampleOutputs": {
+    "overallReadiness": 3,
+    "readinessLabel": "Promising, needs review",
+    "strengths": [
+      "Mission and target population appear aligned with the opportunity.",
+      "Program concept is understandable and fundable at a basic demo level.",
+      "Funding request has a clear use case."
+    ],
+    "gaps": [
+      "Outcome measures need to be more specific.",
+      "Budget support and attachment requirements need confirmation.",
+      "Partner roles and implementation timeline need stronger detail."
+    ],
+    "recommendedNextSteps": [
+      "Confirm eligibility and deadline requirements.",
+      "Collect baseline service-area data and expected participant counts.",
+      "Draft a simple budget narrative and match it to program activities.",
+      "Assign a reviewer before using any generated narrative externally."
+    ],
+    "sampleNarrative": "Riverbend Community Learning Center is seeking support to expand equitable digital access for students through an after-school learning lab. The proposed program would provide supervised technology access, tutoring support, and family workshops that help participants build confidence using digital tools. Before submission, the team should confirm eligibility, strengthen outcome measures, and align the budget narrative with the proposed activities."
+  },
+  "evaluationTerms": {
+    "evaluationWindowDays": 14,
+    "recommendedAgreement": "Use an NDA or demo-use agreement before sharing.",
+    "ipStatement": "All concepts, workflows, designs, prompts, documentation, and related intellectual property remain the property of the creator unless a signed agreement states otherwise."
+  }
+}
