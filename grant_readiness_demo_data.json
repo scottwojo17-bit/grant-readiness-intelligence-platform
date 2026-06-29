@@ -3,22 +3,22 @@
   "demoName": "Grant Readiness Demo Sandbox",
   "updated": "2026-06-29",
   "status": "evaluation_only",
-  "notice": "This is a limited demonstration dataset. It uses fake organizations, simplified scoring, and sample outputs. It does not include proprietary prompts, private scoring logic, grant failure data, roadmap details, customer data, or production workflow rules.",
+  "notice": "This is a limited demonstration dataset. It uses fake organizations, simplified scoring, and sample outputs. It does not include the production scoring model, expanded analysis features, saved records, roadmap details, customer data, or production workflow rules.",
   "guardrails": [
     "Evaluation use only",
     "No redistribution",
     "No reverse engineering",
     "No production submissions from demo output",
-    "All concepts and future production logic remain owner intellectual property"
+    "All concepts and future production features remain owner intellectual property"
   ],
   "lockedFeatures": [
     "Production scoring model",
-    "Private AI prompts",
-    "Grant failure database",
+    "Advanced analysis features",
+    "Saved records",
     "Full readiness intelligence framework",
     "Admin dashboard",
     "Saved records and user accounts",
-    "Roadmap and enhancement backlog"
+    "Expanded roadmap"
   ],
   "demoScenario": {
     "organizationName": "Riverbend Community Learning Center",
@@ -83,6 +83,6 @@
   "evaluationTerms": {
     "evaluationWindowDays": 14,
     "recommendedAgreement": "Use an NDA or demo-use agreement before sharing.",
-    "ipStatement": "All concepts, workflows, designs, prompts, documentation, and related intellectual property remain the property of the creator unless a signed agreement states otherwise."
+    "ipStatement": "All concepts, workflows, designs, documentation, and related intellectual property remain the property of the creator unless a signed agreement states otherwise."
   }
 }
