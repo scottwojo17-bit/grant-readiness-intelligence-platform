@@ -103,7 +103,7 @@ const valueFlowStepCriteria = [
 const productOutcomes = [
   {
     title: "Funding Intelligence Platform",
-    items: ["Centralized grant opportunity database", "Grant qualification and scoring system", "Funding pipeline management process"],
+    items: ["Centralized grant opportunity tracker", "Grant qualification and scoring system", "Funding pipeline management process"],
   },
   {
     title: "Grant Development Toolkit",
@@ -168,7 +168,7 @@ const organizationAlignmentRubric = [
 
 const confidenceLevels = ["Confirmed by website", "Likely but not confirmed", "Missing from website", "Needs human verification"];
 
-const verificationOptions = ["Needs review", "Verified for proposal use", "Needs backup document", "Do not use in proposal"];
+const verificationOptions = ["Needs review", "Reviewed for proposal use", "Needs backup document", "Do not use in proposal"];
 
 const baseGrantCriteria = [
   {
@@ -274,7 +274,7 @@ const baseGrantCriteria = [
     requirement: "Confirm compliance requirements",
     stage: "Review",
     priority: "Critical",
-    extractedDetail: "Compliance items should be verified before final submission review.",
+    extractedDetail: "Compliance items should be reviewed before submission preparation.",
   },
   {
     id: "page-formatting",
@@ -476,7 +476,7 @@ function createSubmissionPackage(url) {
     result[item.id] = {
       ...item,
       status,
-      blocker: status === "Approved" ? "" : `${item.label} needs owner completion or final approval.`,
+      blocker: status === "Approved" ? "" : `${item.label} needs owner completion or reviewer approval.`,
     };
     return result;
   }, {});
@@ -643,27 +643,35 @@ function createEvidence(seed, offset, note) {
   };
 }
 
+function isProposalReviewed(status) {
+  return status === "Reviewed for proposal use" || status === "Verified for proposal use";
+}
+
+function displayDecision(decision) {
+  return decision === "Move Forward" ? "Recommended Go" : "Hold";
+}
+
 function scoreOrganizationEvidence(evidence) {
   const score = organizationAlignmentRubric.reduce((sum, [, points, key]) => {
     const confidence = evidence[key]?.confidence;
     const verificationStatus = evidence[key]?.verificationStatus;
     const baseEarned = confidence === "Confirmed by website" ? points : confidence === "Likely but not confirmed" ? Math.round(points * 0.5) : confidence === "Needs human verification" ? Math.round(points * 0.25) : 0;
-    const earned = verificationStatus === "Verified for proposal use" ? points : verificationStatus === "Do not use in proposal" ? 0 : baseEarned;
+    const earned = isProposalReviewed(verificationStatus) ? points : verificationStatus === "Do not use in proposal" ? 0 : baseEarned;
     return sum + earned;
   }, 0);
   const missingItems = organizationAlignmentRubric
-    .filter(([, , key]) => evidence[key]?.verificationStatus !== "Verified for proposal use")
+    .filter(([, , key]) => !isProposalReviewed(evidence[key]?.verificationStatus))
     .map(([label]) => label);
   const riskScore = Math.max(0, 100 - score);
-  const verifiedCount = Object.values(evidence).filter((item) => item.verificationStatus === "Verified for proposal use").length;
+  const verifiedCount = Object.values(evidence).filter((item) => isProposalReviewed(item.verificationStatus)).length;
   const blockedCount = Object.values(evidence).filter((item) => item.verificationStatus === "Do not use in proposal").length;
   const evidenceUseStatus =
     blockedCount > 0
       ? "Do not use until corrected"
       : verifiedCount === organizationAlignmentRubric.length
-        ? "Evidence verified"
-        : "Needs reviewer verification";
-  const status = score >= 90 && evidenceUseStatus === "Evidence verified" ? "Strong verified partner" : score >= 80 ? "Good fit, verify evidence" : score >= 70 ? "Needs backup documents" : score >= 50 ? "Weak fit" : "Do not use without justification";
+        ? "Evidence reviewed"
+        : "Needs reviewer check";
+  const status = score >= 90 && evidenceUseStatus === "Evidence reviewed" ? "Strong reviewed partner" : score >= 80 ? "Good fit, review evidence" : score >= 70 ? "Needs backup documents" : score >= 50 ? "Weak fit" : "Do not use without justification";
   return { alignmentScore: score, riskScore, missingItems, status, verifiedCount, evidenceUseStatus };
 }
 
@@ -786,7 +794,7 @@ function classifyScore(score) {
   if (score < 80) return { label: "Needs Correction", tone: "yellow" };
   if (score <= 85) return { label: "First Draft Quality", tone: "blue" };
   if (score <= 94) return { label: "Competitive", tone: "teal" };
-  return { label: "Submission Ready", tone: "green" };
+  return { label: "Preparation Ready", tone: "green" };
 }
 
 function getToneClasses(tone) {
@@ -1154,13 +1162,13 @@ function App() {
 
       <div className="mx-auto grid max-w-7xl gap-6 px-5 py-6">
         <section className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm leading-6 text-blue-800">
-          This workspace generates grant-specific draft criteria, readiness grades, and gap scores in the browser. Evidence must be
-          reviewer-verified before use in proposal language; full live page parsing will be added when the backend/API version is connected.
+          This beta workspace supports grant readiness planning, evidence review, and submission preparation. It uses client-side
+          draft analysis and requires human review before proposal use or submission planning.
         </section>
 
         <section className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
           <div className="panel">
-            <SectionTitle icon={LinkIcon} eyebrow="1. Grant URL Intake" title="Analyze a funding opportunity" />
+            <SectionTitle icon={LinkIcon} eyebrow="1. Grant URL Intake" title="Generate a readiness review" />
             <div className="mt-5 grid gap-3">
               <label className="text-sm font-medium text-slate-700" htmlFor="grant-url">
                 Grant URL
@@ -1175,7 +1183,7 @@ function App() {
                 />
                 <button className="btn-primary min-h-11 justify-center" onClick={analyzeGrant} type="button">
                   <FileSearch size={18} />
-                  Analyze Grant
+                  Generate Readiness Review
                 </button>
               </div>
               {urlError ? <p className="text-sm font-medium text-red-700">{urlError}</p> : null}
@@ -1192,7 +1200,7 @@ function App() {
 
           {hasAnalyzed ? (
             <ScoreCard
-              label="Overall Readiness Score"
+              label="Preliminary Readiness Score"
               score={analytics.overallScore}
               status={analytics.overallStatus}
               footer={analytics.decision === "Move Forward" ? "All active gates pass" : `${analytics.blockedStages.length} gate(s) need attention`}
@@ -1274,7 +1282,7 @@ function App() {
         ) : (
           <section className="panel flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <SectionTitle icon={ShieldCheck} eyebrow="Ready" title="Paste a grant URL and run analysis" />
+              <SectionTitle icon={ShieldCheck} eyebrow="Ready" title="Paste a grant URL and generate a review" />
               <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
                 The workspace will generate a readiness profile from the submitted link, compare it against applicant/project readiness inputs, then calculate gaps,
                 gate status, stage scores, and a prioritized fix list.
@@ -1293,14 +1301,14 @@ function App() {
 
 function ExecutiveSummary({ analytics, alignment, collaboration, currentStage, grantProfile }) {
   const topBlockers = [...analytics.criticalGaps.map((item) => item.requirement), ...collaboration.unresolvedBlockers].slice(0, 3);
-  const nextAction = analytics.recommendedFixes[0] || "Maintain the current evidence package and prepare final submission review.";
+  const nextAction = analytics.recommendedFixes[0] || "Maintain the current evidence package and prepare reviewer signoff.";
 
   return (
     <section className="panel">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <SectionTitle icon={BarChart3} eyebrow="Executive Summary" title="Readiness decision and next action" />
+        <SectionTitle icon={BarChart3} eyebrow="Executive Summary" title="Recommended go / hold and next action" />
         <div className="flex flex-wrap gap-2">
-          <Badge tone={analytics.decision === "Move Forward" ? "green" : "red"}>{analytics.decision}</Badge>
+          <Badge tone={analytics.decision === "Move Forward" ? "green" : "red"}>{displayDecision(analytics.decision)}</Badge>
           <Badge tone={analytics.overallStatus.tone}>{analytics.overallStatus.label}</Badge>
         </div>
       </div>
@@ -1403,7 +1411,7 @@ function ScoreBreakdown({ analytics, alignment, collaboration }) {
     { label: "Preliminary Partner Fit", score: Math.round((alignment.total + stageScore("Design")) / 2), note: "Required partner strength and role clarity before final verification." },
     { label: "Document Readiness", score: collaboration.artifactScore, note: "Evidence files, assignments, and uploaded artifacts." },
     { label: "Budget Readiness", score: stageScore("Draft"), note: "Budget, budget narrative, and allowable cost logic." },
-    { label: "Submission Readiness", score: collaboration.submissionReadiness, note: "Package completion, reviews, and final approvals." },
+    { label: "Submission Preparation", score: collaboration.submissionReadiness, note: "Package completion, reviews, and reviewer approvals." },
   ];
 
   return (
@@ -1528,7 +1536,7 @@ function GrantTrackerDatabase({ records, activeTrackerId, hasAnalyzed, onSaveCur
   return (
     <section className="panel">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <SectionTitle icon={Database} eyebrow="Organization Grant Tracker" title="Grant tracker database" />
+        <SectionTitle icon={Database} eyebrow="Saved Grant Reviews" title="Grant Tracker" />
         <div className="flex flex-wrap gap-3">
           <button className="btn-primary" disabled={!hasAnalyzed} onClick={onSaveCurrent} type="button">
             <Save size={17} />
@@ -1553,20 +1561,20 @@ function GrantTrackerDatabase({ records, activeTrackerId, hasAnalyzed, onSaveCur
       <div className="mt-5 grid gap-3 md:grid-cols-4">
         <MetricTile label="Tracked Grants" value={sortedRecords.length} status="Saved records" tone="blue" />
         <MetricTile label="Average Score" value={`${averageScore}%`} status="Across tracker" tone="blue" />
-        <MetricTile label="Move Forward" value={sortedRecords.filter((record) => record.decision === "Move Forward").length} status="Passing records" tone="green" />
+        <MetricTile label="Recommended Go" value={sortedRecords.filter((record) => record.decision === "Move Forward").length} status="Passing reviews" tone="green" />
         <MetricTile label="Needs Attention" value={sortedRecords.filter((record) => record.decision !== "Move Forward").length} status="Blocked records" tone="red" />
       </div>
 
       <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm leading-6 text-blue-800">
         Tracker records are saved in this browser so the organization can reopen and update each grant workspace on this device.
-        Add the backend database version before using this as a shared team tracker across multiple users.
+        Add shared team storage before using this tracker across multiple users.
       </div>
 
       {activeRecord ? (
         <div className="mt-4 rounded-lg border border-platformBlue bg-blue-50 p-4">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <div className="text-sm font-semibold text-platformBlue">Open tracker record</div>
+              <div className="text-sm font-semibold text-platformBlue">Open saved review</div>
               <div className="mt-1 text-lg font-semibold text-ink">{activeRecord.grantName}</div>
               <div className="mt-1 text-sm text-slate-600">
                 Current stage: {activeRecord.currentStage} | Last saved: {new Date(activeRecord.updatedAt).toLocaleString()}
@@ -1586,7 +1594,7 @@ function GrantTrackerDatabase({ records, activeTrackerId, hasAnalyzed, onSaveCur
               <th className="px-4 py-3">Stage</th>
               <th className="px-4 py-3">Score</th>
               <th className="px-4 py-3">Organizations</th>
-              <th className="px-4 py-3">Decision</th>
+              <th className="px-4 py-3">Recommendation</th>
               <th className="px-4 py-3">Last Updated</th>
               <th className="px-4 py-3">Links</th>
             </tr>
@@ -1609,7 +1617,7 @@ function GrantTrackerDatabase({ records, activeTrackerId, hasAnalyzed, onSaveCur
                   </td>
                   <td className="px-4 py-3">{record.organizationCount}</td>
                   <td className="px-4 py-3">
-                    <Badge tone={record.decision === "Move Forward" ? "green" : "red"}>{record.decision}</Badge>
+                    <Badge tone={record.decision === "Move Forward" ? "green" : "red"}>{displayDecision(record.decision)}</Badge>
                   </td>
                   <td className="px-4 py-3 text-slate-600">{new Date(record.updatedAt).toLocaleString()}</td>
                   <td className="px-4 py-3">
@@ -1803,10 +1811,10 @@ function OrganizationWebsiteIntake({ grantProfile, organizations, setOrganizatio
     <>
       {embedded ? (
         <div className="mt-6 border-t border-slateLine pt-5">
-          <SectionTitle icon={Users} eyebrow="Organization Website Intake" title="Grant organization alignment" />
+          <SectionTitle icon={Users} eyebrow="Organization Website Intake" title="Preliminary organization fit" />
         </div>
       ) : (
-        <SectionTitle icon={LinkIcon} eyebrow="Organization Website Intake" title="Grant organization alignment" />
+        <SectionTitle icon={LinkIcon} eyebrow="Organization Website Intake" title="Preliminary organization fit" />
       )}
         <div className="mt-4 rounded-lg border border-slateLine bg-slate-50 p-4">
           <h3 className="font-semibold text-ink">Organization fit summary</h3>
@@ -1814,7 +1822,7 @@ function OrganizationWebsiteIntake({ grantProfile, organizations, setOrganizatio
             {summarizeOrganizationPool(organizations, grantProfile)}
           </p>
           <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm leading-6 text-amber-800">
-            Accuracy safeguard: website research is not proposal-ready until each claim is marked Verified for proposal use by a reviewer.
+            Accuracy safeguard: website research is not proposal-ready until each claim is reviewed for proposal use or supported by backup documents.
           </div>
         </div>
         <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_0.8fr]">
@@ -1825,7 +1833,7 @@ function OrganizationWebsiteIntake({ grantProfile, organizations, setOrganizatio
               <Meta label="Funding Agency" value={grantProfile.funder} />
               <Meta label="Grant URL / PDF" value={grantProfile.submittedUrl} />
               <Meta label="Required Partners" value="Lead applicant plus qualified sub-organization partners" />
-              <Meta label="Review Criteria" value="Alignment, capacity, evidence, compliance, and submission readiness" />
+              <Meta label="Review Criteria" value="Fit, capacity, evidence, compliance, and submission preparation" />
               <Meta label="Target Population" value="Derived from grant URL and applicant intake" />
             </div>
           </div>
@@ -1918,7 +1926,7 @@ function OrganizationWebsiteIntake({ grantProfile, organizations, setOrganizatio
               <div className="mt-4 rounded-lg border border-slateLine bg-slate-50 p-4">
                 <div className="text-sm font-semibold text-ink">Grant alignment statement</div>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  {selectedOrg.orgName} is a {selectedOrg.alignmentScore}% preliminary fit for {grantProfile.grantName}. Use this organization in grant writing only after the evidence below is marked Verified for proposal use or supported by uploaded backup documents.
+                  {selectedOrg.orgName} is a {selectedOrg.alignmentScore}% preliminary fit for {grantProfile.grantName}. Use this organization in grant writing only after the evidence below is reviewed for proposal use or supported by uploaded backup documents.
                 </p>
               </div>
             </div>
@@ -1926,7 +1934,7 @@ function OrganizationWebsiteIntake({ grantProfile, organizations, setOrganizatio
             <div className="rounded-lg border border-slateLine bg-white p-4">
               <h3 className="text-lg font-semibold text-ink">Accuracy and evidence verification</h3>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Review each claim before it is used in the proposal. Verified items can support grant language; unverified items should trigger backup document requests.
+                Review each claim before it is used in the proposal. Reviewed items can support grant language; uncertain items should trigger backup document requests.
               </p>
               <div className="mt-4 grid gap-3">
                 {organizationAlignmentRubric.map(([label, points, key]) => (
@@ -2062,7 +2070,7 @@ function OrganizationWorkspace({
       [itemId]: {
         ...current[itemId],
         status,
-        blocker: status === "Approved" ? "" : `${current[itemId].label} needs owner completion or final approval.`,
+        blocker: status === "Approved" ? "" : `${current[itemId].label} needs owner completion or reviewer approval.`,
       },
     }));
   }
@@ -2290,8 +2298,8 @@ function Dashboard({ analytics }) {
         <div className="mt-5 rounded-lg border border-slateLine bg-slate-50 p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">Move Forward / Hold Decision</div>
-              <div className="mt-1 text-2xl font-semibold">{analytics.decision}</div>
+              <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">Recommended Go / Hold Decision</div>
+              <div className="mt-1 text-2xl font-semibold">{displayDecision(analytics.decision)}</div>
             </div>
             <Badge tone={analytics.decision === "Move Forward" ? "green" : "red"}>
               {analytics.decision === "Move Forward" ? "Ready for next stage" : "Correction required"}
@@ -2307,30 +2315,30 @@ function SubmissionCommandCenter({ analytics, collaboration, grantProfile }) {
   const finalReady = analytics.decision === "Move Forward" && collaboration.submissionReadiness === 100;
   return (
     <section className="panel">
-      <SectionTitle icon={Send} eyebrow="11. Submit Readiness" title="Final go/no-go command center" />
+      <SectionTitle icon={Send} eyebrow="11. Submission Preparation Review" title="Go / hold preparation review" />
       <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <MetricTile label="Grant QA/QC" value={`${analytics.overallScore}%`} status={analytics.overallStatus.label} tone={analytics.overallStatus.tone} />
         <MetricTile label="Requirement approvals" value={`${collaboration.requirementApprovalScore}%`} status="Reviewer approved" tone={collaboration.requirementApprovalScore === 100 ? "green" : "yellow"} />
         <MetricTile label="Evidence artifacts" value={`${collaboration.artifactScore}%`} status="Uploaded or review-ready" tone={collaboration.artifactScore === 100 ? "green" : "yellow"} />
-        <MetricTile label="Submission packet" value={`${collaboration.packageScore}%`} status="Approved packet items" tone={collaboration.packageScore === 100 ? "green" : "red"} />
-        <MetricTile label="Review gates" value={`${collaboration.reviewScore}%`} status="Final approvals" tone={collaboration.reviewScore === 100 ? "green" : "red"} />
+        <MetricTile label="Submission packet" value={`${collaboration.packageScore}%`} status="Reviewed packet items" tone={collaboration.packageScore === 100 ? "green" : "red"} />
+        <MetricTile label="Review gates" value={`${collaboration.reviewScore}%`} status="Reviewer approvals" tone={collaboration.reviewScore === 100 ? "green" : "red"} />
       </div>
       <div className="mt-5 rounded-lg border border-slateLine bg-slate-50 p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">Direct Submit Decision</div>
-            <div className="mt-1 text-2xl font-semibold">{finalReady ? "Ready to submit" : "Do not submit yet"}</div>
+            <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">Recommended Go / Hold Decision</div>
+            <div className="mt-1 text-2xl font-semibold">{finalReady ? "Ready to prepare submission" : "Hold for corrections"}</div>
             <p className="mt-2 text-sm leading-6 text-slate-600">
               {finalReady
-                ? `${grantProfile.grantName} has cleared grant scoring, packet, artifact, and approval gates.`
-                : `${grantProfile.grantName} still has unresolved blockers before final submission.`}
+                ? `${grantProfile.grantName} has cleared the preparation review gates. A human reviewer should still confirm portal requirements before submission.`
+                : `${grantProfile.grantName} still has unresolved preparation blockers before submission planning.`}
             </p>
           </div>
-          <Badge tone={finalReady ? "green" : "red"}>{finalReady ? "Submission Ready" : "Hold"}</Badge>
+          <Badge tone={finalReady ? "green" : "red"}>{finalReady ? "Preparation Ready" : "Hold"}</Badge>
         </div>
       </div>
       <InfoList
-        title="Remaining Submit Blockers"
+        title="Remaining Preparation Blockers"
         empty="No blockers remain."
         items={collaboration.unresolvedBlockers.slice(0, 8)}
       />
@@ -2420,7 +2428,7 @@ function ReadinessCriteriaDropdown({ analytics, alignment, collaboration }) {
           <div className="text-sm font-semibold text-ink">Readiness score criteria</div>
           <div className="text-xs leading-5 text-slate-600">Open each step to see what drove the score and what is needed next.</div>
         </div>
-        <Badge tone={analytics.decision === "Move Forward" ? "green" : "red"}>{analytics.decision}</Badge>
+        <Badge tone={analytics.decision === "Move Forward" ? "green" : "red"}>{displayDecision(analytics.decision)}</Badge>
       </div>
       <div className="mt-3 grid gap-2">
         {valueFlowStepCriteria.map((step) => {
@@ -2511,10 +2519,10 @@ function buildValueFlowStepScores(analytics, alignment, collaboration) {
 function AwaitingAnalysisCard() {
   return (
     <div className="panel">
-      <div className="text-sm font-medium text-slate-600">Overall Readiness Score</div>
+      <div className="text-sm font-medium text-slate-600">Preliminary Readiness Score</div>
       <div className="mt-3 text-4xl font-semibold text-slate-400">--</div>
       <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200" />
-      <p className="mt-3 text-sm text-slate-600">Paste a grant URL and run analysis to generate a readiness score.</p>
+      <p className="mt-3 text-sm text-slate-600">Paste a grant URL and generate a readiness review to see a preliminary score.</p>
     </div>
   );
 }
