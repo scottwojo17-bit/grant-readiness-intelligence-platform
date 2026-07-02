@@ -651,6 +651,11 @@ function displayDecision(decision) {
   return decision === "Move Forward" ? "Recommended Go" : "Hold";
 }
 
+function formatBlockedStages(blockedStages) {
+  if (!blockedStages.length) return "None";
+  return blockedStages.map((item) => item.stage).join(", ");
+}
+
 function scoreOrganizationEvidence(evidence) {
   const score = organizationAlignmentRubric.reduce((sum, [, points, key]) => {
     const confidence = evidence[key]?.confidence;
@@ -1327,7 +1332,7 @@ function ExecutiveSummary({ analytics, alignment, collaboration, currentStage, g
 
         <div className="grid gap-4 md:grid-cols-3">
           <MetricTile label="Overall Readiness" value={`${analytics.overallScore}%`} status={analytics.overallStatus.label} tone={analytics.overallStatus.tone} />
-          <MetricTile label="Blocked Gates" value={analytics.blockedStages.length} status={analytics.blockedStages.join(", ") || "None"} tone={analytics.blockedStages.length ? "red" : "green"} />
+          <MetricTile label="Blocked Gates" value={analytics.blockedStages.length} status={formatBlockedStages(analytics.blockedStages)} tone={analytics.blockedStages.length ? "red" : "green"} />
           <MetricTile label="Next Stage" value={currentStage} status={nextAction} tone="blue" />
         </div>
       </div>
@@ -1828,10 +1833,10 @@ function OrganizationWebsiteIntake({ grantProfile, organizations, setOrganizatio
         <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_0.8fr]">
           <div className="rounded-lg border border-slateLine bg-slate-50 p-4">
             <h3 className="font-semibold text-ink">Main grant input</h3>
-            <div className="mt-3 grid gap-3 md:grid-cols-2">
-              <Meta label="Grant Name" value={grantProfile.grantName} />
+            <div className="mt-3 grid gap-x-8 gap-y-4 md:grid-cols-2">
+              <Meta className="md:col-span-2" label="Grant Name" value={grantProfile.grantName} />
               <Meta label="Funding Agency" value={grantProfile.funder} />
-              <Meta label="Grant URL / PDF" value={grantProfile.submittedUrl} />
+              <Meta className="md:col-span-2" label="Grant URL / PDF" value={grantProfile.submittedUrl} />
               <Meta label="Required Partners" value="Lead applicant plus qualified sub-organization partners" />
               <Meta label="Review Criteria" value="Fit, capacity, evidence, compliance, and submission preparation" />
               <Meta label="Target Population" value="Derived from grant URL and applicant intake" />
@@ -2565,9 +2570,9 @@ function StatusSelect({ value, options, onChange }) {
 
 function MetricTile({ label, value, status, tone }) {
   return (
-    <div className="rounded-lg border border-slateLine bg-white p-4">
+    <div className="min-w-0 rounded-lg border border-slateLine bg-white p-4">
       <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</div>
-      <div className="mt-2 text-3xl font-semibold tabular-nums">{value}</div>
+      <div className="mt-2 break-words text-3xl font-semibold tabular-nums">{value}</div>
       <div className="mt-3">
         <Badge tone={tone}>{status}</Badge>
       </div>
@@ -2588,11 +2593,11 @@ function MiniList({ title, items }) {
   );
 }
 
-function Meta({ label, value }) {
+function Meta({ label, value, className = "" }) {
   return (
-    <div>
+    <div className={`min-w-0 ${className}`}>
       <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</div>
-      <div className="mt-1 font-medium text-ink">{value}</div>
+      <div className="mt-1 overflow-wrap-anywhere font-medium leading-6 text-ink">{value}</div>
     </div>
   );
 }
@@ -2610,9 +2615,9 @@ function InfoList({ title, items, empty }) {
 
 function CardRow({ label, value }) {
   return (
-    <div>
+    <div className="min-w-0">
       <dt className="font-semibold text-slate-500">{label}</dt>
-      <dd className="mt-0.5 text-ink">{value}</dd>
+      <dd className="mt-0.5 overflow-wrap-anywhere text-ink">{value}</dd>
     </div>
   );
 }
